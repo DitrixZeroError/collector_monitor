@@ -1,0 +1,98 @@
+{% extends "settings/layout.html" %}
+{% set section = 'external' %}
+{% block title %}Дополнительные данные{% endblock %}
+
+
+{% block settings_content %}
+{#
+  Описание каждого набора данных: какие колонки ждём и зачем данные нужны модели.
+  Сами формы одинаковые, поэтому рисуются в цикле.
+#}
+{% set datasets = [
+  {
+    'name': 'hot_works',
+    'columns': ['ид_объект', 'начало', 'окончание', 'тип_работ (необязательно)'],
+    'purpose': 'Модель узнаёт, идут ли на объекте сварочные и другие горячие работы, сколько часов прошло с их окончания и начнутся ли они в ближайшие сутки. Это самый ценный источник для роста качества прогноза.',
+    'note': 'Загружайте план работ, известный заранее. Журналы, заполненные задним числом, искажают прогноз.',
+  },
+  {
+    'name': 'weather',
+    'columns': ['дата и время', 'температура', 'влажность'],
+    'purpose': 'Погода за каждый час добавляется к признакам. Несколько записей за один час усредняются.',
+    'note': 'Названия колонок с показателями сохраняются как в файле: модель ищет признаки именно по этим названиям.',
+  },
+  {
+    'name': 'incidents',
+    'columns': ['ид_объект', 'datetime'],
+    'purpose': 'Подтверждённые пожары. Срабатывание датчиков считается настоящим пожаром, только если в реестре есть инцидент на этом объекте в пределах двух часов. Инциденты до начала журнала становятся историей объекта: сколько часов прошло с последнего пожара и сколько пожаров было за год.',
+    'note': 'Когда реестр загружен, подтверждение берётся только из него, как при обучении модели.',
+  },
+] %}
+<div class="section-head">
+  <div>
+    <h1>Дополнительные данные</h1>
+    <p class="section-note">Внешние источники, которые повышают качество прогноза. Все они необязательны: если данных нет, соответствующие признаки не создаются. После загрузки идущая эмуляция сразу пересчитывает прогноз.</p>
+  </div>
+</div>
+
+{% for dataset in datasets %}
+  {% set info = summary[dataset.name] %}
+  <section class="settings-card external-card" id="{{ dataset.name }}">
+    <div class="external-head">
+      <div>
+        <h2>{{ titles[dataset.name] }}</h2>
+        <p class="external-columns">
+          Колонки:
+          {% for column in dataset.columns %}<code>{{ column }}</code>{% if not loop.last %}, {% endif %}{% endfor %}
+          <a href="{{ url_for('settings.external_data_template', dataset_name=dataset.name) }}">Скачать образец</a>
+        </p>
+      </div>
+      {% if info.rows_count %}
+        <span class="status-pill status-ok">Загружено: {{ info.rows_count }}</span>
+      {% else %}
+        <span class="status-pill status-silent">Не загружено</span>
+      {% endif %}
+    </div>
+
+    <p>{{ dataset.purpose }}</p>
+    <p class="field-hint">{{ dataset.note }}</p>
+
+    {% if info.rows_count %}
+      <dl class="facts">
+        <dt>Период</dt><dd>{{ info.first }} — {{ info.last }}</dd>
+        {% if info.objects_count is not none %}<dt>Объектов</dt><dd>{{ info.objects_count }}</dd>{% endif %}
+      </dl>
+      <div class="table-wrap preview-table">
+        <table class="data-table">
+          <thead><tr>{% for column in info.preview_columns %}<th>{{ column }}</th>{% endfor %}</tr></thead>
+          <tbody>
+            {% for row in info.preview %}
+              <tr>{% for value in row %}<td>{{ value }}</td>{% endfor %}</tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p class="field-hint">Показаны последние 5 записей.</p>
+    {% endif %}
+
+    <div class="control-row">
+      <form method="post" enctype="multipart/form-data" class="inline-form"
+            action="{{ url_for('settings.external_data_import', dataset_name=dataset.name) }}">
+        <input type="file" name="csv_file" accept=".csv" required aria-label="Файл CSV">
+        <select name="mode" aria-label="Что сделать с уже загруженными данными">
+          <option value="replace">Заменить загруженные</option>
+          <option value="append">Добавить к загруженным</option>
+        </select>
+        <button class="button button-primary" type="submit">Загрузить</button>
+      </form>
+
+      {% if info.rows_count %}
+        <form method="post" action="{{ url_for('settings.external_data_clear', dataset_name=dataset.name) }}"
+              onsubmit="return confirm('Удалить все загруженные данные «{{ titles[dataset.name] }}»?');">
+          <button class="button danger" type="submit">Удалить данные</button>
+        </form>
+      {% endif %}
+    </div>
+  </section>
+{% endfor %}
+{% endblock %}

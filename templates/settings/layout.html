@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block body_class %}page-settings{% endblock %}
+
+{% block content %}
+<div class="settings-layout">
+  <aside class="settings-nav">
+    <span style="font-size: 16px; font-weight: bold;">Справочники</span>
+    <a href="{{ url_for('settings.objects_list') }}" class="{{ 'is-current' if section == 'objects' }}">Объекты</a>
+    <a href="{{ url_for('settings.channels_list') }}" class="{{ 'is-current' if section == 'channels' }}">Журнал датчиков</a>
+    <a href="{{ url_for('settings.users_list') }}" class="{{ 'is-current' if section == 'users' }}">Пользователи</a>
+    <a href="{{ url_for('settings.roles_list') }}" class="{{ 'is-current' if section == 'roles' }}">Роли пользователей</a>
+
+    <span style="font-size: 16px; font-weight: bold;">Прогнозирование</span>
+    <a href="{{ url_for('settings.model_page') }}" class="{{ 'is-current' if section == 'model' }}">Модель прогнозирования</a>
+    <a href="{{ url_for('settings.external_data_page') }}" class="{{ 'is-current' if section == 'external' }}">Дополнительные данные</a>
+    <a href="{{ url_for('settings.emulation_page') }}" class="{{ 'is-current' if section == 'emulation' }}">Эмуляция</a>
+  </aside>
+
+  <main class="settings-content">
+    {% block settings_content %}{% endblock %}
+  </main>
+</div>
+{% endblock %}

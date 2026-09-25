@@ -1,0 +1,96 @@
+"ид_объект","иерархия_уровень","родитель","вид_объекта","диспетчерское_название_объекта"
+5122,3,5,controlHouse,ДУ объект Альфа
+5123,3,5,controlHouse,ДП объект Альфа
+5124,3,5,controlHouse,ДП объект Альфа 2 этаж
+5339,3,5,guardObject,объект Пси
+5340,3,5,controlHouse,объект Пси шкаф ОПС
+20,3,6,guardObject,объект Фита
+111,3,6,controlHouse,ДП объект Бета
+165,3,6,guardObject,объект Бета
+4765,3,6,controlHouse,Шкаф ОПС объект Бета
+5961,3,7,guardObject,объект Гамма ОС
+5962,3,7,guardObject,объект Гамма ПС
+5963,3,7,controlHouse,объект Гамма ДУ
+5966,3,7,controlHouse,объект Гамма шкафы
+4610,3,8,controlHouse,ДУ объект Дельта
+5113,3,8,guardObject,объект Дельта
+5114,3,8,controlHouse,Шкаф ОПС объект Дельта
+28,3,9,guardObject,объект Вита
+99,3,9,controlHouse,ДП объект Вита
+4767,3,9,controlHouse,Шкаф ОПС объект Вита
+5011,3,9,controlHouse,ДУ объект Вита
+3902,3,11,controlHouse,ДП объект Эпсилон
+3903,3,11,controlHouse,Шкафы ОС объект Эпсилон
+3904,3,11,guardObject,объект Эпсилон ОС
+3905,3,11,guardObject,объект Пси ОС
+4095,3,11,guardObject,объект Хи
+4541,3,11,controlHouse,Шкаф ОПС объект Хи
+4543,3,11,controlHouse,ДУ объект Хи
+5537,3,11,guardObject,объект Пси ПС
+5539,3,11,guardObject,объект Эпсилон ПС
+5540,3,11,controlHouse,Шкафы ПС объект Эпсилон
+4770,3,12,controlHouse,Шкаф ОПС объект Зита
+5129,3,12,guardObject,объект Фита
+5132,3,12,controlHouse,ДП объект Зита
+5578,3,12,controlHouse,объект Дзета ДУ
+5579,3,12,controlHouse,объект Дзета шкафы
+5580,3,12,guardObject,объект Дзета ОС
+5581,3,12,guardObject,объект Дзета ПС
+5582,3,12,guardObject,объект Зита ОС
+5583,3,12,guardObject,объект Зита ПС
+5591,3,12,controlHouse,объект Зита ДУ
+5593,3,12,controlHouse,объект Зита шкафы
+5594,3,12,controlHouse,объект Дзета щит. ПК48 Г1 ПК5
+42,3,15,guardObject,объект Каппа ОС
+5567,3,15,guardObject,объект Каппа ПС
+5574,3,15,controlHouse,объект Каппа шкафы
+5657,3,15,controlHouse,объект Каппа ДУ
+3215,3,3218,guardObject,объект Йота
+3216,3,3218,controlHouse,ДП объект Йота
+3250,3,3218,controlHouse,Шкаф ОПС объект Йота
+5218,3,3218,controlHouse,объект Йота ДУ
+3356,3,3355,guardObject,ПС объект Тау
+3388,3,3355,controlHouse,ДУ объект Тау
+5009,3,3355,controlHouse,Шкаф ОПС ПС объект Тау
+3360,3,3359,controlHouse,ДУ объект Омикрон
+4391,3,3359,guardObject,объект Омикрон
+4392,3,3359,controlHouse,ДП объект Омикрон
+4763,3,3359,controlHouse,Шкаф ОПС объект Омикрон
+5674,3,3828,controlHouse,объект Мю ДП
+5675,3,3828,controlHouse,объект Мю ДУ
+5676,3,3828,guardObject,объект Мю ОС
+5677,3,3828,guardObject,объект Мю ПС
+5678,3,3828,controlHouse,объект Мю шкафы
+5773,1,3831,district,Район по эксплуатации
+4069,3,4068,guardObject,объект Сигма
+4177,3,4068,controlHouse,ДП объект Сигма
+4768,3,4068,controlHouse,Шкаф ОПС объект Сигма
+108,3,4356,controlHouse,ДП ПС объект Ро
+4369,3,4356,controlHouse,ДУ ПС объект Ро
+4370,3,4356,guardObject,объект Ро
+4569,3,4356,controlHouse,Шкаф ОПС ПС объект Ро
+4574,3,4573,controlHouse,ДП ПС объект Омега
+4577,3,4573,controlHouse,Шкаф ОПС ПС объект Омега
+4648,3,4573,guardObject,ПС объект Омега
+5003,3,4573,controlHouse,ДУ ПС объект Омега
+5332,3,5327,guardObject,объект Кси ПК0-ПК202
+5333,3,5327,controlHouse,ДУ объект Кси
+5336,3,5327,controlHouse,ДП объект Кси
+5338,3,5327,controlHouse,"Шкаф ОПС, ДУ объект Кси"
+5343,3,5327,guardObject,объект Кси ПК202-ПК302
+5,2,5773,controlHouse,объект Альфа
+6,2,5773,controlHouse,объект Бета
+7,2,5773,controlHouse,объект Гамма
+8,2,5773,controlHouse,Комплекс объект Дельта
+9,2,5773,controlHouse,объект Вита
+11,2,5773,controlHouse,объект Эпсилон
+12,2,5773,controlHouse,объект Зита
+15,2,5773,controlHouse,объект Каппа
+3218,2,5773,controlHouse,объект Йота
+3355,2,5773,controlHouse,объект Тау
+3359,2,5773,controlHouse,объект Омикрон
+3828,2,5773,controlHouse,объект Мю
+4068,2,5773,controlHouse,объект Сигма
+4356,2,5773,controlHouse,ПС объект Ро
+4573,2,5773,controlHouse,ПС объект Омега
+5327,2,5773,controlHouse,объект Кси

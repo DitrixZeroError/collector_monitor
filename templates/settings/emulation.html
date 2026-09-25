@@ -1,0 +1,159 @@
+{% extends "settings/layout.html" %}
+{% set section = 'emulation' %}
+{% block title %}Эмуляция{% endblock %}
+
+{% block settings_content %}
+<div class="section-head">
+  <div>
+    <h1>Эмуляция работы системы</h1>
+    <p class="section-note">Журнал событий датчиков проигрывается в ускоренном времени, как будто данные приходят прямо сейчас. Наблюдать за этим можно на рабочем месте диспетчера.</p>
+  </div>
+  <a class="button" href="{{ url_for('pages.dispatcher') }}">Открыть рабочее место</a>
+</div>
+
+{% if not prediction_enabled %}
+  <div class="flash flash-info">
+    Прогнозирование выключено: эмуляция покажет показания датчиков, но без прогноза.
+    <a href="{{ url_for('settings.model_page') }}">Включить прогноз</a>.
+  </div>
+{% endif %}
+
+<!-- Текущее состояние: обновляется скриптом внизу страницы -->
+<section class="settings-card" id="emulation-state" data-status="{{ state.status }}">
+  <h2>Состояние</h2>
+  <dl class="facts">
+    <dt>Статус</dt><dd id="state-status">—</dd>
+    <dt>Журнал</dt><dd id="state-file">{{ state.log_file_name or '—' }}</dd>
+    <dt>Модельное время</dt><dd id="state-time">{{ state.simulation_time or '—' }}</dd>
+    <dt>Период журнала</dt><dd id="state-period">—</dd>
+    <dt>Обработано событий</dt><dd id="state-events">—</dd>
+    <dt>Последний прогноз</dt><dd id="state-prediction">—</dd>
+  </dl>
+  <div class="progress" aria-hidden="true"><div class="progress-bar" id="state-progress" style="width: {{ state.progress_percent }}%"></div></div>
+  <p class="field-hint" id="state-message">{{ state.status_message }}</p>
+
+  <div class="control-row">
+    <form method="post" action="{{ url_for('settings.emulation_control') }}">
+      <input type="hidden" name="action" value="pause">
+      <button class="button" type="submit" id="button-pause">Пауза</button>
+    </form>
+    <form method="post" action="{{ url_for('settings.emulation_control') }}">
+      <input type="hidden" name="action" value="resume">
+      <button class="button" type="submit" id="button-resume">Продолжить</button>
+    </form>
+    <form method="post" action="{{ url_for('settings.emulation_control') }}">
+      <input type="hidden" name="action" value="stop">
+      <button class="button danger" type="submit" id="button-stop">Остановить</button>
+    </form>
+    <form method="post" action="{{ url_for('settings.emulation_control') }}" class="inline-form">
+      <input type="hidden" name="action" value="speed">
+      <select name="speed" aria-label="Скорость">
+        {% for speed_value, speed_label in speed_options.items() %}
+          <option value="{{ speed_value }}" {{ 'selected' if speed_value == state.speed }}>{{ speed_label }}</option>
+        {% endfor %}
+      </select>
+      <button class="button" type="submit">Сменить скорость</button>
+    </form>
+  </div>
+</section>
+
+<!-- Запуск -->
+<section class="settings-card">
+  <h2>Запустить эмуляцию</h2>
+  {% if log_files %}
+  <form method="post" action="{{ url_for('settings.emulation_start') }}" class="stacked-form">
+    <label for="log-name">Журнал событий</label>
+    <select id="log-name" name="log_name" required>
+      {% for log_file in log_files %}
+        <option value="{{ log_file.name }}">{{ log_file.name }} ({{ log_file.size_mb }} МБ)</option>
+      {% endfor %}
+    </select>
+
+    <label for="speed">Скорость</label>
+    <select id="speed" name="speed">
+      {% for speed_value, speed_label in speed_options.items() %}
+        <option value="{{ speed_value }}" {{ 'selected' if speed_value == 600 }}>{{ speed_label }}</option>
+      {% endfor %}
+    </select>
+
+    <div class="form-actions">
+      <button class="button button-primary" type="submit">Запустить эмуляцию</button>
+    </div>
+    <p class="field-hint">Если эмуляция уже идёт, она остановится, и журнал начнётся заново.</p>
+    <p class="field-hint">
+      Дополнительные данные для прогноза:
+      {% for name, rows_count in external_counts.items() -%}
+        {{ external_titles[name] | lower }} — {{ rows_count if rows_count else 'нет' }}{{ ', ' if not loop.last else '.' }}
+      {%- endfor %}
+      <a href="{{ url_for('settings.external_data_page') }}">Загрузить</a>
+    </p>
+  </form>
+  {% else %}
+    <p class="empty-state">Загруженных журналов пока нет. Загрузите CSV-файл ниже.</p>
+  {% endif %}
+</section>
+
+<!-- Загрузка журнала -->
+<section class="settings-card">
+  <h2>Загрузить журнал событий</h2>
+  <p>
+    CSV в кодировке UTF-8 с колонками <code>ид_канала_данных</code>, <code>дата</code>, <code>время</code>,
+    <code>тревожное</code>, <code>значение_датчика</code> (как в «журнал_событий_пример.csv»).
+  </p>
+  <form method="post" action="{{ url_for('settings.emulation_upload') }}" enctype="multipart/form-data" class="inline-form">
+    <input type="file" name="log_file" accept=".csv" required>
+    <button class="button" type="submit">Загрузить журнал</button>
+  </form>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  /*
+   * Обновляем блок «Состояние» раз в секунду, не перезагружая страницу.
+   * Кнопки показываем только те, что имеют смысл в текущем статусе.
+   */
+  "use strict";
+
+  const STATUS_LABELS = {
+    idle: "Не запускалась",
+    running: "Идёт",
+    paused: "На паузе",
+    finished: "Завершена",
+    stopped: "Остановлена",
+    error: "Ошибка",
+  };
+
+  function setText(elementId, text) {
+    document.getElementById(elementId).textContent = text;
+  }
+
+  function updateButtons(status) {
+    document.getElementById("button-pause").hidden = status !== "running";
+    document.getElementById("button-resume").hidden = status !== "paused";
+    document.getElementById("button-stop").hidden = !(status === "running" || status === "paused");
+  }
+
+  async function refreshEmulationState() {
+    const response = await fetch("{{ url_for('api.api_status') }}");
+    if (!response.ok) return;
+    const state = (await response.json()).emulation;
+
+    setText("state-status", STATUS_LABELS[state.status] || state.status);
+    setText("state-file", state.log_file_name || "—");
+    setText("state-time", state.simulation_time || "—");
+    setText("state-period", state.first_event_time ? `${state.first_event_time} — ${state.last_event_time}` : "—");
+    setText("state-events", state.total_events
+      ? `${state.processed_events.toLocaleString("ru-RU")} из ${state.total_events.toLocaleString("ru-RU")} (${state.progress_percent}%)`
+      : "—");
+    setText("state-prediction", state.prediction_hour || state.prediction_message || "—");
+    setText("state-message", state.status_message || "");
+    document.getElementById("state-progress").style.width = `${state.progress_percent}%`;
+    updateButtons(state.status);
+  }
+
+  updateButtons("{{ state.status }}");
+  refreshEmulationState();
+  setInterval(refreshEmulationState, 1000);
+</script>
+{% endblock %}

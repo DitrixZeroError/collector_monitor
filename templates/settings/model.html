@@ -1,0 +1,104 @@
+{% extends "settings/layout.html" %}
+{% set section = 'model' %}
+{% block title %}Модель прогнозирования{% endblock %}
+
+{% block settings_content %}
+<div class="section-head">
+  <div>
+    <h1>Модель прогнозирования</h1>
+    <p class="section-note">«Пожарный риск»: раннее предупреждение о повышенном риске пожара или задымления в коллекторе по динамике показаний датчиков.</p>
+  </div>
+</div>
+
+<!-- Включение прогноза -->
+<section class="settings-card switch-card {{ 'is-on' if prediction_enabled }}">
+  <div>
+    <h2>Прогнозирование {{ 'включено' if prediction_enabled else 'выключено' }}</h2>
+    <p>
+      {% if prediction_enabled %}
+        Каждый час данные с датчиков передаются в модель, прогноз показывается на рабочем месте диспетчера.
+      {% elif active_model_id %}
+        Модель выбрана. Включите прогнозирование, чтобы диспетчер увидел прогноз.
+      {% else %}
+        Сначала загрузите файл модели ниже.
+      {% endif %}
+    </p>
+  </div>
+  <form method="post" action="{{ url_for('settings.model_toggle') }}">
+    <input type="hidden" name="enabled" value="{{ '0' if prediction_enabled else '1' }}">
+    <button class="button {{ '' if prediction_enabled else 'button-primary' }}" type="submit"
+            {{ 'disabled' if not active_model_id and not prediction_enabled }}>
+      {{ 'Выключить прогнозирование' if prediction_enabled else 'Включить прогнозирование' }}
+    </button>
+  </form>
+</section>
+
+<!-- Описание выбранной модели -->
+{% if model_error %}
+  <div class="flash flash-error">Выбранную модель не удалось прочитать: {{ model_error }}</div>
+{% elif model_description %}
+<section class="settings-card">
+  <h2>Выбранная модель</h2>
+  <dl class="facts">
+    <dt>Формат</dt><dd>{{ 'Пакет моделей (словарь)' if model_description.kind == 'bundle' else 'Модель scikit-learn' }}</dd>
+    {% set model_names = {
+      'ens': 'Ансамбль (среднее LightGBM и CatBoost)',
+      'cb': 'CatBoost',
+      'lgb': 'LightGBM',
+      'baseline': 'Логистическая регрессия (базовая)',
+      'sklearn': 'Модель scikit-learn',
+    } %}
+    <dt>Основная модель</dt><dd>{{ model_names.get(model_description.main_model, model_description.main_model) }}</dd>
+    <dt>Состав</dt><dd>{{ model_description.sub_models }}</dd>
+    <dt>Признаков на входе</dt><dd>{{ model_description.features_count }}</dd>
+    <dt>Калибровка вероятности</dt><dd>{{ 'Есть' if model_description.has_calibrator else 'Нет' }}</dd>
+    <dt>Порог повышенного риска</dt><dd>{{ '%.2f' | format(model_description.threshold * 100) }}%</dd>
+  </dl>
+</section>
+{% endif %}
+
+<!-- Загрузка -->
+<section class="settings-card">
+  <h2>Загрузить модель</h2>
+  <p>Файл в формате <code>.joblib</code>. После загрузки файл сразу проверяется: если его не удаётся прочитать, он не сохраняется.</p>
+  <form method="post" action="{{ url_for('settings.model_upload') }}" enctype="multipart/form-data" class="inline-form">
+    <input type="file" name="model_file" accept=".joblib" required>
+    <button class="button button-primary" type="submit">Загрузить</button>
+  </form>
+  <p class="field-hint">Файл .joblib может содержать исполняемый код. Загружайте модели только из надёжных источников.</p>
+</section>
+
+<!-- Список загруженных -->
+<section class="settings-card">
+  <h2>Загруженные модели</h2>
+  {% if model_rows %}
+  <table class="data-table">
+    <thead><tr><th>Файл</th><th>Загружен</th><th>Кем</th><th></th></tr></thead>
+    <tbody>
+      {% for row in model_rows %}
+      <tr class="{{ 'is-selected-row' if row.id == active_model_id }}">
+        <td>{{ row.original_name }}</td>
+        <td class="muted">{{ row.uploaded_at }}</td>
+        <td>{{ row.uploaded_by }}</td>
+        <td class="row-actions">
+          {% if row.id == active_model_id %}
+            <span class="status-pill status-ok">Используется</span>
+          {% else %}
+            <form method="post" action="{{ url_for('settings.model_activate', model_id=row.id) }}">
+              <button class="link-button" type="submit">Использовать</button>
+            </form>
+          {% endif %}
+          <form method="post" action="{{ url_for('settings.model_delete', model_id=row.id) }}"
+                onsubmit="return confirm('Удалить модель {{ row.original_name }}?');">
+            <button class="link-button danger" type="submit">Удалить</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p class="empty-state">Моделей пока нет. Загрузите файл выше, например fire_risk_model_v2.joblib.</p>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "settings/layout.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{#
+  Общая форма добавления и редактирования для всех справочников.
+  Список полей приходит из Python (функции *_form_fields в routes_settings.py).
+  Если форму отправили с ошибкой, показываем то, что ввёл пользователь,
+  а не старые значения — чтобы не пришлось набирать всё заново.
+#}
+{% block settings_content %}
+{% set form_was_sent = request.method == 'POST' %}
+<div class="section-head">
+  <h1>{{ title }}</h1>
+</div>
+
+<form class="edit-form" method="post">
+  {% for f in fields %}
+    {% set current_value = request.form.get(f.name, '') if form_was_sent else f.value %}
+    {% set current_value = '' if current_value is none else current_value | string %}
+
+    <div class="form-row">
+      {% if f.kind == 'checkbox' %}
+        {% set is_checked = (f.name in request.form) if form_was_sent else (f.value and f.value | string != '0') %}
+        <label class="checkbox-inline">
+          <input type="checkbox" name="{{ f.name }}" value="1" {{ 'checked' if is_checked }}>
+          {{ f.label }}
+        </label>
+
+      {% else %}
+        <label for="field-{{ f.name }}">{{ f.label }}{% if f.required %} <span class="required" title="Обязательное поле">*</span>{% endif %}</label>
+
+        {% if f.kind == 'select' %}
+          <select id="field-{{ f.name }}" name="{{ f.name }}" {{ 'required' if f.required }}>
+            {% for option_value, option_label in f.options %}
+              <option value="{{ option_value }}" {{ 'selected' if option_value | string == current_value }}>{{ option_label }}</option>
+            {% endfor %}
+          </select>
+
+        {% elif f.readonly %}
+          {# Ключевое поле при редактировании менять нельзя: показываем и отправляем как есть #}
+          <input id="field-{{ f.name }}" name="{{ f.name }}" value="{{ current_value }}" readonly class="is-readonly">
+
+        {% else %}
+          <input id="field-{{ f.name }}" name="{{ f.name }}"
+                 type="{{ 'password' if f.kind == 'password' else 'text' }}"
+                 {{ 'inputmode=numeric' if f.kind == 'number' }}
+                 value="{{ '' if f.kind == 'password' else current_value }}"
+                 {{ 'required' if f.required }}
+                 {{ 'autocomplete=new-password' if f.kind == 'password' }}>
+        {% endif %}
+      {% endif %}
+
+      {% if f.hint %}<p class="field-hint">{{ f.hint }}</p>{% endif %}
+    </div>
+  {% endfor %}
+
+  <div class="form-actions">
+    <button class="button button-primary" type="submit">Сохранить</button>
+    <a class="button" href="{{ back_url }}">Отмена</a>
+  </div>
+</form>
+{% endblock %}

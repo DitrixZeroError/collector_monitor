@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Вход{% endblock %}
+{% block body_class %}page-login{% endblock %}
+
+{% block content %}
+<main class="login-layout">
+  <section class="login-intro">
+    <img src="/static/fire_forecast_logo_40.png" height="250">
+    
+    <p>Система предиктивной аналитики и прогнозирования пожаров.</p>
+  </section>
+
+  <form class="login-card" method="post" autocomplete="on">
+    <h2>Вход в систему</h2>
+
+    <label for="login">Логин</label>
+    <input id="login" name="login" type="text" required autofocus autocomplete="username">
+
+    <label for="password">Пароль</label>
+    <input id="password" name="password" type="password" required autocomplete="current-password">
+
+    <button class="button login-button" type="submit">Войти</button>
+  </form>
+</main>
+{% endblock %}

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FIRE FORECAST</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+  {% block head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+
+{% if g.current_user %}
+<header class="topbar">
+  <a class="brand" href="{{ url_for('pages.dispatcher') }}">
+    
+    <img src="/static/fire_forecast_logo_40_2.png" height="40">
+    <span class="brand-text">FIRE FORECAST</span>
+  </a>
+
+  <nav class="topnav" aria-label="Разделы">
+    <a href="{{ url_for('pages.dispatcher') }}"
+       class="{{ 'is-current' if request.endpoint == 'pages.dispatcher' }}">Рабочее место</a>
+    {% if g.current_user.can_manage_settings %}
+      <a href="{{ url_for('settings.index') }}"
+         class="{{ 'is-current' if request.blueprint == 'settings' }}">Настройки</a>
+    {% endif %}
+  </nav>
+
+  {% block topbar_extra %}{% endblock %}
+
+  <div class="user-box">
+    <span class="user-name">{{ g.current_user.full_name or g.current_user.login }}</span>
+    <span class="user-role">{{ g.current_user.role_name }}</span>
+    <a class="logout" href="{{ url_for('auth.logout') }}">Выйти</a>
+  </div>
+</header>
+{% endif %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-stack" role="status">
+      {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+{% block content %}{% endblock %}
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

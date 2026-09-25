@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+data/*.sqlite3
+data/uploads/models/*.joblib
+data/uploads/logs/*.csv

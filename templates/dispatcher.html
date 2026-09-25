@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Рабочее место диспетчера{% endblock %}
+{% block body_class %}page-dispatcher{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="/static/leaflet/leaflet.css">
+{% endblock %}
+
+{% block topbar_extra %}
+<div class="sim-clock" id="sim-clock" title="Время в потоке данных">
+  <span class="sim-dot" id="sim-dot"></span>
+  <span id="sim-clock-text">Данные не поступают</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<main class="dispatcher-layout">
+
+  <!-- Блок 1. Карта Москвы с объектами -->
+  <section class="map-block" aria-label="Карта объектов">
+    <div id="map"></div>
+    <div class="map-legend">
+      <span><i class="legend-dot legend-normal"></i>Норма</span>
+      <span><i class="legend-dot legend-warning"></i>Внимание</span>
+      <span><i class="legend-dot legend-alarm"></i>Тревога</span>
+      <span><i class="legend-dot legend-risk"></i>Прогноз риска пожара</span>
+    </div>
+    <div class="last-alarm" id="last-alarm" hidden></div>
+  </section>
+
+  <div class="side-column">
+
+    <!-- Блок 2. Датчики выбранного объекта -->
+    <section class="panel sensors-panel" aria-labelledby="sensors-title" style="height: 90vh !important;">
+      <header class="panel-header sensors-title">
+        <h2 id="sensors-title">Датчики объекта</h2>
+        <p class="panel-subtitle" id="sensors-subtitle">Выберите объект на карте</p>
+      </header>
+
+      <div class="sensor-filters" id="sensor-filters" hidden>
+        <input type="search" id="sensor-search" placeholder="Найти датчик по названию">
+        <select id="sensor-system-filter">
+          <option value="">Все подсистемы</option>
+        </select>
+        <label class="checkbox-inline">
+          <input type="checkbox" id="sensor-only-active" checked>
+          Только с показаниями
+        </label>
+      </div>
+
+      <div class="panel-body" id="sensors-body">
+        <p class="empty-state">Нажмите на точку на карте — здесь появятся установленные датчики и их последние показания.</p>
+      </div>
+    </section>
+
+
+  </div>
+  <div class="side-column">
+
+    <!-- Блок 3. Прогноз пожарного риска -->
+    <section class="panel forecast-panel" aria-labelledby="forecast-title" style="height: 90vh !important;">
+      <header class="panel-header forecast-title">
+        <h2 id="forecast-title">Прогноз пожарного риска</h2>
+        <p class="panel-subtitle" id="forecast-subtitle"></p>
+      </header>
+      <div class="panel-body" id="forecast-body" style="height: 90vh !important;" >
+        <p class="empty-state">Загрузка…</p>
+      </div>
+    </section>
+
+  </div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Настройки карты передаются с сервера
+  window.DISPATCHER_CONFIG = {
+    mapCenter: {{ map_center | list | tojson }},
+    mapZoom: {{ map_zoom }},
+    canManageSettings: {{ 'true' if g.current_user.can_manage_settings else 'false' }},
+    settingsModelUrl: "{{ url_for('settings.model_page') }}",
+    settingsEmulationUrl: "{{ url_for('settings.emulation_page') }}"
+  };
+</script>
+<script src="{{ url_for('static', filename='js/dispatcher.js') }}"></script>
+<script src="{{ url_for('static', filename='leaflet/leaflet.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "settings/layout.html" %}
+{% set section = 'roles' %}
+{% block title %}Роли пользователей{% endblock %}
+
+{% block settings_content %}
+<div class="section-head">
+  <div>
+    <h1>Роли пользователей</h1>
+    <p class="section-note">Роль определяет, какие разделы доступны пользователю. «Администратор» и «Диспетчер» обязательны.</p>
+  </div>
+  <a class="button button-primary" href="{{ url_for('settings.role_create') }}">Добавить роль</a>
+</div>
+
+<div class="table-wrap">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Код</th>
+        <th>Название</th>
+        <th>Описание</th>
+        <th>Доступ к настройкам</th>
+        <th class="num">Пользователей</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in role_rows %}
+      <tr>
+        <td>{{ row.code }}</td>
+        <td>{{ row.name }}</td>
+        <td class="muted">{{ row.description }}</td>
+        <td>{{ 'Да' if row.can_manage_settings else 'Нет' }}</td>
+        <td class="num">{{ row.users_count }}</td>
+        <td class="row-actions">
+          <a href="{{ url_for('settings.role_edit', role_id=row.id) }}">Изменить</a>
+          {% if row.code not in protected_codes %}
+          <form method="post" action="{{ url_for('settings.role_delete', role_id=row.id) }}"
+                onsubmit="return confirm('Удалить роль «{{ row.name }}»?');">
+            <button class="link-button danger" type="submit">Удалить</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

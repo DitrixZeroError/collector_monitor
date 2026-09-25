@@ -1,0 +1,17 @@
+{# Постраничная навигация: одинакова для всех справочников #}
+{% macro pagination(page_number, page_count) -%}
+  {% if page_count > 1 %}
+    {% set query = request.args.to_dict() %}
+    <nav class="pagination" aria-label="Страницы">
+      {% if page_number > 1 %}
+        {% set _ = query.update({'page': page_number - 1}) %}
+        <a href="?{{ query | urlencode }}">Назад</a>
+      {% endif %}
+      <span>Страница {{ page_number }} из {{ page_count }}</span>
+      {% if page_number < page_count %}
+        {% set _ = query.update({'page': page_number + 1}) %}
+        <a href="?{{ query | urlencode }}">Вперёд</a>
+      {% endif %}
+    </nav>
+  {% endif %}
+{%- endmacro %}

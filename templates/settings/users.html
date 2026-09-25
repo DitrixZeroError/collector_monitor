@@ -1,0 +1,51 @@
+{% extends "settings/layout.html" %}
+{% set section = 'users' %}
+{% block title %}Пользователи{% endblock %}
+
+{% block settings_content %}
+<div class="section-head">
+  <div>
+    <h1>Пользователи</h1>
+    <p class="section-note">Кто может входить в систему и с какой ролью.</p>
+  </div>
+  <a class="button button-primary" href="{{ url_for('settings.user_create') }}">Добавить пользователя</a>
+</div>
+
+<div class="table-wrap">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Логин</th>
+        <th>ФИО</th>
+        <th>Роль</th>
+        <th>Статус</th>
+        <th>Создан</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in user_rows %}
+      <tr>
+        <td>{{ row.login }}</td>
+        <td>{{ row.full_name }}</td>
+        <td>{{ row.role_name }}</td>
+        <td>
+          {% if row.is_active %}<span class="status-pill status-ok">Активен</span>
+          {% else %}<span class="status-pill status-nodata">Заблокирован</span>{% endif %}
+        </td>
+        <td class="muted">{{ row.created_at.replace('T', ' ') }}</td>
+        <td class="row-actions">
+          <a href="{{ url_for('settings.user_edit', user_id=row.id) }}">Изменить</a>
+          {% if row.id != g.current_user.id %}
+          <form method="post" action="{{ url_for('settings.user_delete', user_id=row.id) }}"
+                onsubmit="return confirm('Удалить пользователя {{ row.login }}?');">
+            <button class="link-button danger" type="submit">Удалить</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

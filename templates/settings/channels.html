@@ -1,0 +1,96 @@
+{% extends "settings/layout.html" %}
+{% from "settings/_macros.html" import pagination with context %}
+{% set section = 'channels' %}
+{% block title %}Журнал датчиков{% endblock %}
+
+{% block settings_content %}
+<div class="section-head">
+  <div>
+    <h1>Журнал датчиков</h1>
+    <p class="section-note">Какие датчики установлены и на каком объекте.</p>
+  </div>
+  <a class="button button-primary" href="{{ url_for('settings.channel_create') }}">Добавить датчик</a>
+</div>
+
+<form class="toolbar" method="get">
+  <input type="search" name="q" value="{{ search_text }}" placeholder="Название, тег или ид канала">
+  <select name="system">
+    <option value="">Все подсистемы</option>
+    {% for name in system_types %}
+      <option {{ 'selected' if name == system_filter }}>{{ name }}</option>
+    {% endfor %}
+  </select>
+  <select name="sensor">
+    <option value="">Все типы датчиков</option>
+    {% for name in sensor_types %}
+      <option {{ 'selected' if name == sensor_filter }}>{{ name }}</option>
+    {% endfor %}
+  </select>
+  <select name="object">
+    <option value="">Все объекты</option>
+    {% for row in object_options %}
+      <option value="{{ row.object_id }}" {{ 'selected' if row.object_id | string == object_filter }}>
+        {{ row.dispatch_name }}
+      </option>
+    {% endfor %}
+  </select>
+  <button class="button" type="submit">Показать</button>
+  {% if search_text or system_filter or sensor_filter or object_filter %}
+    <a href="{{ url_for('settings.channels_list') }}">Сбросить</a>
+  {% endif %}
+  <span class="toolbar-count">Найдено: {{ total_rows }}</span>
+</form>
+
+<details class="import-box">
+  <summary>Импорт датчиков из CSV</summary>
+  <p>
+    Обязательные колонки: <code>ид_канала_данных</code>, <code>тип_инж_системы</code>,
+    <code>тип_датчика</code>, <code>название_датчика</code>. Необязательные:
+    <code>тег_инженерной_системы</code>, <code>ид_объекта</code>.
+    Существующие каналы обновятся, новые добавятся.
+  </p>
+  <form method="post" action="{{ url_for('settings.channels_import') }}" enctype="multipart/form-data" class="inline-form">
+    <input type="file" name="csv_file" accept=".csv" required>
+    <button class="button" type="submit">Импортировать</button>
+  </form>
+</details>
+
+<div class="table-wrap">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th class="num">Ид канала</th>
+        <th>Тип инж. системы</th>
+        <th>Тип датчика</th>
+        <th>Название датчика</th>
+        <th>Тег</th>
+        <th>Объект</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in channel_rows %}
+      <tr>
+        <td class="num">{{ row.channel_id }}</td>
+        <td>{{ row.system_type }}</td>
+        <td>{{ row.sensor_type }}</td>
+        <td>{{ row.sensor_name }}</td>
+        <td class="muted">{{ row.system_tag }}</td>
+        <td>{{ row.object_name or '—' }}</td>
+        <td class="row-actions">
+          <a href="{{ url_for('settings.channel_edit', channel_id=row.channel_id) }}">Изменить</a>
+          <form method="post" action="{{ url_for('settings.channel_delete', channel_id=row.channel_id) }}"
+                onsubmit="return confirm('Удалить датчик {{ row.channel_id }}?');">
+            <button class="link-button danger" type="submit">Удалить</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" class="empty-state">Под фильтр не попал ни один датчик.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{{ pagination(page_number, page_count) }}
+{% endblock %}

@@ -1,0 +1,589 @@
+/*
+ * Оформление приложения.
+ *
+ * Идея: спокойная «инженерная» палитра — серый бетон коллектора,
+ * стальной сине-зелёный цвет трубопроводов для обычных элементов
+ * и яркие сигнальные цвета только для того, что требует реакции
+ * диспетчера (тревога, внимание, риск пожара).
+ */
+
+/* ------------------------------------------------------------------ */
+/* Переменные: цвета, шрифт, отступы                                   */
+/* ------------------------------------------------------------------ */
+:root {
+  --paper: #e6eaec;      /* фон страницы: бетон */
+  --panel: #ffffff;      /* фон панелей */
+  --ink: #1b2a35;        /* основной текст */
+  --muted: #5b6b77;      /* второстепенный текст */
+  --line: #c9d2d8;       /* линии и рамки */
+  --line-soft: #e3e8eb;
+  --pipe: #007714;       /* основной акцент: «труба» */
+  --pipe-dark: #00522c;
+  --ok: #2f7d4f;         /* норма */
+  --warn: #dfdc59;       /* внимание */
+  --alarm: #cc993b;      /* тревога датчика */
+  --fire: #d30e00;       /* повышенный риск пожара */
+  --nodata: #8a97a1;     /* нет данных */
+
+  --font: "Golos Text", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --radius-small: 4px;
+  --radius-large: 8px;
+  --topbar-height: 52px;
+}
+
+* { box-sizing: border-box; }
+
+/* Атрибут hidden должен скрывать элемент, даже если у класса задан display */
+[hidden] { display: none !important; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--ink);
+  background: var(--paper);
+  font-variant-numeric: tabular-nums; /* цифры одной ширины — таблицы ровнее */
+}
+
+a { color: var(--pipe); }
+a:hover { color: var(--pipe-dark); }
+
+h1, h2 { margin: 0; line-height: 1.2; }
+h1 { font-size: 24px; font-weight: 600; }
+h2 { font-size: 17px; font-weight: 600; }
+
+code {
+  font-size: 13px;
+  background: var(--line-soft);
+  padding: 1px 5px;
+  border-radius: var(--radius-small);
+}
+
+:focus-visible {
+  outline: 3px solid var(--warn);
+  outline-offset: 2px;
+}
+
+.muted { color: var(--muted); font-size: 13px; }
+
+/* ------------------------------------------------------------------ */
+/* Кнопки и поля                                                       */
+/* ------------------------------------------------------------------ */
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-small);
+  background: var(--panel);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.button:hover { border-color: var(--pipe); color: var(--pipe-dark); }
+.button:disabled { opacity: .5; cursor: not-allowed; }
+
+.button-primary { background: var(--pipe); border-color: var(--pipe); color: #fff; }
+.button-primary:hover { background: var(--pipe-dark); border-color: var(--pipe-dark); color: #fff; }
+
+.button.danger { color: var(--alarm); }
+.button.danger:hover { border-color: var(--alarm); }
+
+.link-button {
+  border: 0;
+  padding: 0;
+  background: none;
+  font: inherit;
+  color: var(--pipe);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.link-button.danger { color: var(--alarm); }
+
+input[type="text"], input[type="password"], input[type="search"], input:not([type]), select {
+  font: inherit;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-small);
+  background: var(--panel);
+  color: var(--ink);
+  min-width: 0;
+}
+input.is-readonly { background: var(--line-soft); color: var(--muted); }
+
+.checkbox-inline { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+
+/* ------------------------------------------------------------------ */
+/* Сообщения                                                           */
+/* ------------------------------------------------------------------ */
+.flash-stack { padding: 12px 20px 0; display: grid; gap: 8px; }
+.flash {
+  padding: 10px 14px;
+  border-radius: var(--radius-small);
+  border-left: 4px solid var(--pipe);
+  background: var(--panel);
+}
+.flash-success { border-left-color: var(--ok); }
+.flash-error { border-left-color: var(--alarm); }
+.flash-info { border-left-color: var(--warn); margin-bottom: 16px; }
+
+.empty-state { color: var(--muted); padding: 16px 0; margin: 0; }
+
+/* ------------------------------------------------------------------ */
+/* Верхняя панель                                                      */
+/* ------------------------------------------------------------------ */
+.topbar {
+  height: var(--topbar-height);
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 0 20px;
+  background: var(--ink);
+  color: #e8eef1;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: inherit;
+  text-decoration: none;
+  font-weight: 600;
+}
+.brand:hover { color: #fff; }
+
+/* Знак: сечение коллектора — прямоугольный тоннель с тремя «трубами» */
+.brand-mark {
+  width: 26px;
+  height: 20px;
+  border: 2px solid #8fc2cf;
+  border-radius: 3px 3px 8px 8px;
+  background:
+    radial-gradient(circle at 30% 40%, #8fc2cf 2.5px, transparent 3px),
+    radial-gradient(circle at 70% 40%, #8fc2cf 2.5px, transparent 3px),
+    radial-gradient(circle at 50% 75%, #e5a03a 2.5px, transparent 3px);
+}
+
+.topnav { display: flex; gap: 4px; }
+.topnav a {
+  color: #b9c7cf;
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: var(--radius-small);
+}
+.topnav a:hover { color: #fff; }
+.topnav a.is-current { color: #fff; background: rgba(255, 255, 255, .1); }
+
+.sim-clock {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #b9c7cf;
+}
+.sim-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--nodata); }
+.sim-dot.is-running { background: #4fc27d; animation: pulse 1.6s ease-in-out infinite; }
+.sim-dot.is-paused { background: var(--warn); }
+.sim-dot.is-error { background: var(--alarm); }
+
+@keyframes pulse {
+  50% { box-shadow: 0 0 0 5px rgba(79, 194, 125, .25); }
+}
+
+.user-box { margin-left: auto; display: flex; align-items: center; gap: 12px; font-size: 14px; }
+.user-role { color: #8fa3ae; }
+.logout { color: #b9c7cf; }
+
+/* ------------------------------------------------------------------ */
+/* Страница входа                                                      */
+/* ------------------------------------------------------------------ */
+.login-layout {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 420px);
+  align-items: center;
+  gap: 48px;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.login-intro h1 { font-size: 34px; font-weight: 700; max-width: 18ch; margin-top: 28px; }
+.login-intro p { color: var(--muted); max-width: 46ch; font-size: 17px; }
+
+/* Схема: сечение тоннеля с кабелями и трубами */
+.tunnel-diagram {
+  position: relative;
+  width: 180px;
+  height: 120px;
+  border: 3px solid var(--ink);
+  border-radius: 6px 6px 30px 30px;
+  background: var(--panel);
+}
+.tunnel-diagram span {
+  position: absolute;
+  border-radius: 50%;
+  border: 3px solid var(--pipe);
+}
+.tunnel-diagram span:nth-child(1) { width: 34px; height: 34px; left: 18px; top: 18px; }
+.tunnel-diagram span:nth-child(2) { width: 34px; height: 34px; left: 18px; top: 62px; }
+.tunnel-diagram span:nth-child(3) { width: 22px; height: 22px; right: 26px; top: 20px; border-color: var(--warn); }
+.tunnel-diagram span:nth-child(4) { width: 22px; height: 22px; right: 26px; top: 52px; border-color: var(--warn); }
+
+.login-card {
+  display: grid;
+  gap: 8px;
+  padding: 28px;
+  background: var(--panel);
+  border-radius: var(--radius-large);
+  border-top: 4px solid #d77a1a;
+}
+.login-card h2 { margin-bottom: 8px; font-size: 20px; }
+.login-card label { font-size: 14px; color: var(--muted); margin-top: 6px; }
+.login-card .button { margin-top: 16px; justify-content: center; padding: 10px; }
+
+.login-button {
+  background: #af6214;
+    border-color: #af6214;
+    color: #fff;
+}
+
+.login-button:hover {
+  background: #75420f;
+    border-color: #75420f;
+    color: #fff;
+}
+
+/* ------------------------------------------------------------------ */
+/* Рабочее место диспетчера                                            */
+/* ------------------------------------------------------------------ */
+.page-dispatcher { overflow: hidden; }
+.page-dispatcher .flash-stack { position: absolute; top: calc(var(--topbar-height) + 8px); right: 16px; z-index: 1000; }
+
+.dispatcher-layout {
+  height: calc(100vh - var(--topbar-height));
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 440px 440px;
+}
+
+.map-block { position: relative; min-height: 0; }
+#map { position: absolute; inset: 0; }
+
+.map-legend {
+  position: absolute;
+  left: 12px;
+  bottom: 24px;
+  z-index: 500;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, .94);
+  border-radius: var(--radius-small);
+  font-size: 13px;
+}
+.map-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend-dot { width: 25px; height: 25px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px var(--line); }
+.legend-normal { background: var(--pipe); }
+.legend-warning { background: var(--warn); }
+.legend-alarm { background: var(--alarm); }
+.legend-risk { background: var(--fire); }
+
+.last-alarm {
+  position: absolute;
+  top: 12px;
+  left: 56px;
+  right: 12px;
+  z-index: 500;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  padding: 8px 12px;
+  background: var(--panel);
+  border-left: 4px solid var(--alarm);
+  border-radius: var(--radius-small);
+  font-size: 14px;
+}
+.last-alarm-label { font-weight: 600; color: var(--alarm); }
+
+.side-column {
+  display: grid;
+  /*grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);*/
+  border-left: 1px solid var(--line);
+  background: var(--panel);
+  min-height: 0;
+}
+
+.panel { display: flex; flex-direction: column; min-height: 0; }
+.panel + .panel { border-top: 6px solid var(--paper); }
+.panel-header { padding: 14px 18px 10px; border-bottom: 1px solid var(--line-soft); }
+.panel-subtitle { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+.panel-body { flex: 1; overflow-y: auto; padding: 4px 18px 16px; }
+
+.sensor-filters {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 10px 18px;
+  border-bottom: 1px solid var(--line-soft);
+  font-size: 14px;
+}
+.sensor-filters input[type="search"] { grid-column: 1 / -1; }
+
+.sensor-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.sensor-table th {
+  text-align: left;
+  font-weight: 500;
+  font-size: 12px;
+  color: var(--muted);
+  padding: 8px 6px 6px 0;
+  position: sticky;
+  top: 0;
+  background: var(--panel);
+}
+.sensor-table td { padding: 7px 6px 7px 0; border-top: 1px solid var(--line-soft); vertical-align: top; }
+.sensor-name { font-weight: 500; }
+.sensor-meta { color: var(--muted); font-size: 12px; }
+.sensor-value { white-space: nowrap; }
+.sensor-row.status-alarm .sensor-name { color: var(--alarm); }
+.sensors-title { background-color: #e6e4e4;}
+
+.status-pill {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  color: #fff;
+  background: var(--nodata);
+}
+.status-pill.status-ok { background: var(--ok); }
+.status-pill.status-warning { background: var(--warn); }
+.status-pill.status-alarm { background: var(--alarm); }
+.status-pill.status-silent { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+
+.object-prediction {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px 0 4px;
+  padding: 8px 12px;
+  border-radius: var(--radius-small);
+  background: var(--line-soft);
+}
+.object-prediction.is-high { background: var(--fire); color: #fff; }
+
+/* Прогноз: «лестница риска» */
+.forecast-summary { margin: 10px 0; padding: 8px 12px; border-radius: var(--radius-small); font-size: 14px; }
+.forecast-summary.is-calm { background: #e7f2eb; color: #1f5a37; }
+.forecast-summary.is-alert { background: var(--fire); color: #fff; font-weight: 500; }
+.forecast-title { background-color: #ffe0e0 !important; }
+
+.risk-ladder { list-style: none; margin: 0; padding: 0; }
+.risk-row {
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--line-soft);
+  cursor: pointer;
+  border-radius: var(--radius-small);
+}
+.risk-row:hover { background: #f3f6f7; }
+.risk-row-top { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; }
+.risk-value { font-weight: 600; }
+.risk-row.is-high .risk-name, .risk-row.is-high .risk-value { color: var(--fire); }
+
+.risk-track {
+  position: relative;
+  height: 8px;
+  margin-top: 5px;
+  background: var(--line-soft);
+  border-radius: 4px;
+}
+.risk-bar { height: 100%; border-radius: 4px; background: var(--pipe); }
+.risk-row.is-high .risk-bar { background: var(--fire); }
+.risk-threshold {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 2px;
+  background: var(--ink);
+}
+
+.risk-factors { margin: 6px 0 0; padding-left: 18px; font-size: 13px; color: var(--muted); }
+.risk-factors b { color: var(--ink); font-weight: 600; }
+
+/* Всплывающая подсказка Leaflet — нашим шрифтом */
+.leaflet-container { font-family: var(--font); }
+.leaflet-tooltip { font-size: 13px; }
+
+/* ------------------------------------------------------------------ */
+/* Настройки                                                           */
+/* ------------------------------------------------------------------ */
+.settings-layout {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  min-height: calc(100vh - var(--topbar-height));
+}
+
+.settings-nav {
+  padding: 20px 12px;
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+}
+.settings-nav h2 { font-size: 13px; font-weight: 500; color: var(--muted); margin: 16px 10px 6px; }
+.settings-nav h2:first-child { margin-top: 0; }
+.settings-nav a {
+  display: block;
+  padding: 7px 10px;
+  border-radius: var(--radius-small);
+  color: var(--ink);
+  text-decoration: none;
+}
+.settings-nav a:hover { background: var(--line-soft); }
+.settings-nav a.is-current { background: var(--pipe); color: #fff; }
+
+.settings-content { padding: 24px 28px 48px; max-width: 1400px; }
+
+.section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.section-note { margin: 4px 0 0; color: var(--muted); max-width: 70ch; }
+
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 12px; }
+.toolbar input[type="search"] { width: 280px; }
+.toolbar select { max-width: 220px; }
+.toolbar-count { margin-left: auto; color: var(--muted); font-size: 14px; }
+
+.table-wrap { overflow-x: auto; background: var(--panel); border-radius: var(--radius-large); }
+
+.data-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.data-table th {
+  text-align: left;
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--muted);
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+.data-table td { padding: 8px 12px; border-bottom: 1px solid var(--line-soft); vertical-align: top; }
+.data-table tr:last-child td { border-bottom: 0; }
+.data-table .num { text-align: right; }
+.data-table .empty-state { text-align: center; }
+.is-selected-row td { background: #eef6f8; }
+
+.row-actions { white-space: nowrap; text-align: right; }
+.row-actions > * { display: inline-block; margin-left: 12px; }
+.row-actions form { display: inline; }
+
+.pagination { display: flex; align-items: center; gap: 16px; margin-top: 12px; font-size: 14px; }
+
+.import-box {
+  margin-bottom: 12px;
+  padding: 10px 14px;
+  background: var(--panel);
+  border-radius: var(--radius-large);
+  font-size: 14px;
+}
+.import-box summary { cursor: pointer; font-weight: 500; }
+.import-box p { color: var(--muted); }
+
+.inline-form { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+/* Форма добавления и редактирования */
+.edit-form {
+  max-width: 560px;
+  padding: 22px 24px;
+  background: var(--panel);
+  border-radius: var(--radius-large);
+}
+.form-row { display: grid; gap: 4px; margin-bottom: 14px; }
+.form-row label { font-size: 14px; font-weight: 500; }
+.required { color: var(--alarm); }
+.field-hint { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+.form-actions { display: flex; gap: 8px; margin-top: 18px; }
+
+.stacked-form { display: grid; gap: 6px; max-width: 520px; }
+.stacked-form label { font-size: 14px; font-weight: 500; margin-top: 6px; }
+
+/* Карточки разделов «Модель» и «Эмуляция» */
+.settings-card {
+  margin-bottom: 16px;
+  padding: 18px 22px;
+  background: var(--panel);
+  border-radius: var(--radius-large);
+}
+.settings-card h2 { margin-bottom: 8px; }
+.settings-card > p { margin: 0 0 12px; color: var(--muted); max-width: 75ch; }
+
+.switch-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  border-left: 6px solid var(--nodata);
+}
+.switch-card.is-on { border-left-color: var(--ok); }
+.switch-card p { margin: 0; }
+
+.facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 6px 24px;
+  margin: 0 0 12px;
+  font-size: 14px;
+}
+.facts dt { color: var(--muted); }
+.facts dd { margin: 0; font-weight: 500; }
+
+.progress { height: 10px; background: var(--line-soft); border-radius: 5px; overflow: hidden; }
+.progress-bar { height: 100%; background: var(--pipe); transition: width .5s linear; }
+
+.control-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+
+/* ------------------------------------------------------------------ */
+/* Узкие экраны                                                        */
+/* ------------------------------------------------------------------ */
+@media (max-width: 1000px) {
+  .page-dispatcher { overflow: auto; }
+  .dispatcher-layout { height: auto; grid-template-columns: 1fr 300px 300px; }
+  .map-block { height: 60vh; }
+  .side-column { grid-template-rows: auto auto; border-left: 0; }
+  .panel-body { max-height: 60vh; }
+
+  .settings-layout { grid-template-columns: 1fr; }
+  .settings-nav { border-right: 0; border-bottom: 1px solid var(--line); }
+
+  .login-layout { grid-template-columns: 1fr; gap: 24px; }
+  .user-role, .brand-text { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sim-dot.is-running { animation: none; }
+  .progress-bar { transition: none; }
+}
+
+/* Страница «Дополнительные данные» */
+.external-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.external-columns { margin: 4px 0 12px; font-size: 14px; color: var(--muted); }
+.external-columns a { margin-left: 8px; }
+.preview-table { margin-bottom: 4px; border: 1px solid var(--line-soft); }
+
+/* Состояние датчика «люди или работы на объекте» */
+.status-pill.status-presence { background: #e2eef2; color: var(--pipe-dark); }
+
+/* Горячие работы на выбранном объекте */
+.hot-works { list-style: none; margin: 8px 0 4px; padding: 0; font-size: 14px; }
+.hot-works li { padding: 6px 10px; border-left: 4px solid var(--line); background: #f5f7f8; margin-bottom: 4px; }
+.hot-works li.is-active { border-left-color: var(--warn); background: #fdf4e3; }
